@@ -20,12 +20,12 @@ class TBWSQueryClientService {
       this.callbacks = callbacks;
     }
   }
-  
+
   /**
    * Create a query request object.
    * @param {string} query - The query string.
    * @param {boolean} live - Whether the query is live.
-   * @param {string} dateFrom - The starting date for the query
+   * @param {string} dateFrom - The starting date for the query (only ISODateString)
    * @returns {Object} The query request object.
    */
   createQueryRequest(query, live, dateFrom/*, symbols,  types*/) {
@@ -33,10 +33,10 @@ class TBWSQueryClientService {
       messageType: 'SUBSCRIBE_QUERY',
       query: query,
       live: live,
-      from: dateFrom
+      from: typeof dateFrom !== "undefined" ? dateFrom : null
     };
   }
-  
+
   /**
    * Connect to the WebSocket subscription.
    * @param {string} token - The authentication token.
@@ -47,13 +47,13 @@ class TBWSQueryClientService {
         'Cookie': 'access_token=' + encodeURIComponent(token) + '; path=/;' // Set the authentication token in the headers
       }
     });
-    
+
     this.ws.onopen = () => this.onOpen(); // Handle the WebSocket open event
     this.ws.onmessage = (message) => this.onMessage(message); // Handle the WebSocket message event
     this.ws.onerror = (error) => this.onError(error); // Handle the WebSocket error event
     this.ws.onclose = (msg) => this.onClose(msg); // Handle the WebSocket close event
   }
-  
+
   /**
    * Start a subscription with the given query.
    * @param {string} query - The query string.
@@ -65,7 +65,7 @@ class TBWSQueryClientService {
     console.log("Subscribe request: " + request);
     this.ws.send(request); // Send the subscription request
   }
-  
+
   /**
    * Handle the WebSocket open event.
    */
@@ -76,7 +76,7 @@ class TBWSQueryClientService {
       console.log("### WS opened ###");
     }
   }
-  
+
   /**
    * Handle the WebSocket message event.
    * @param {Object} message - The message received from the server.
@@ -88,7 +88,7 @@ class TBWSQueryClientService {
       console.log("MESSAGE: ", message.data);
     }
   }
-  
+
   /**
    * Handle the WebSocket error event.
    * @param {Object} error - The error received from the server.
@@ -101,7 +101,7 @@ class TBWSQueryClientService {
       console.error(error);
     }
   }
-  
+
   /**
    * Handle the WebSocket close event.
    * @param {Object} message - The close message received from the server.
@@ -113,7 +113,7 @@ class TBWSQueryClientService {
       console.log("### closed ###");
     }
   }
-  
+
   /**
    * Disconnect from the WebSocket server.
    */
