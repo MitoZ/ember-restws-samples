@@ -7,6 +7,7 @@ This project provides a WebSocket client service for querying trades data. The s
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Keycloak Configuration](#keycloak-configuration)
 - [Usage](#usage)
 - [Important Methods](#important-methods)
 - [File Descriptions](#file-descriptions)
@@ -71,7 +72,64 @@ In `connection.settings.js` there is few additional necessary parameters
 
 If **live = true**: the subscription will return all data from dateFrom to the current moment and will remain active; as new records appear in the database, they will be sent to the subscription. if dateFrom is not specified, it will default to "Date Now."
 
-If **live = false**: the subscription will return data from dateFrom to the current moment, and the subscription will then be closed.if dateFrom is not specified, the data will be selected from the very beginning of the stream.
+If **live = false**: the subscription will return data from dateFrom to the current moment, and the subscription will then be closed. if dateFrom is not specified, the data will be selected from the very beginning of the stream.
+
+## Keycloak Configuration
+This is quick guide for creating keycloak client with `client_credentials` authorisation flow (grant_type).
+
+### Keycloak before 19
+1. **Log in to the Keycloak Admin Console**:
+  - Open your browser and navigate to your Keycloak server (e.g., `http://localhost:8080`).
+  - Log in to the Keycloak Admin Console using your admin credentials.
+
+2. **Select Your Realm**:
+  - From the dropdown menu in the top-left corner, select the realm where you want to create the client (or create a new realm if needed).
+
+3. **Create a New Client**:
+  - In the left-hand menu, click on "Clients".
+  - Click on the "Create" button to create a new client.
+
+4. **Client Settings**:
+  - **Client ID**: Enter a unique identifier for your client (e.g., `websocket-client`). This is your `KEYCLOAK_CLIENT_ID`.
+  - **Client Protocol**: Select `openid-connect`.
+  - **Access Type**: Select `confidential`. This type requires a client secret for authentication.
+  - **Standard Flow Enabled**: Leave this option enabled.
+  - **Implicit Flow Enabled**: Leave this option disabled.
+  - **Direct Access Grants Enabled**: Leave this option enabled.
+  - **Service Accounts Enabled**: Leave this option enabled.
+  - **Authorization Enabled**: Leave this option disabled.
+  - **Valid Redirect URIs**: Fill with any one.
+  - Click on "Save" to create the client.
+
+5. **Obtain Client Secret**:
+  - After saving, click on the "Credentials" tab.
+  - Copy the value of the `Secret` field. This is your `KEYCLOAK_CLIENT_SECRET`.
+
+### Keycloak 19 and later
+
+1. **Log in to the Keycloak Admin Console**:
+  - Open your browser and navigate to your Keycloak server (e.g., `http://localhost:8080`).
+  - Log in to the Keycloak Admin Console using your admin credentials.
+
+2. **Select Your Realm**:
+  - From the dropdown menu in the top-left corner, select the realm where you want to create the client (or create a new realm if needed).
+
+3. **Create a New Client**:
+  - In the left-hand menu, click on "Clients".
+  - Click on the "Create" button to create a new client.
+
+4. **Client Settings**:
+  - **Client ID**: Enter a unique identifier for your client (e.g., `websocket-client`). This is your `KEYCLOAK_CLIENT_ID`.
+  - Click on "Next". 
+  - **Client authentication**: Leave this option enabled.
+  - **Standard Flow Enabled**: Leave this option enabled.
+  - **Service accounts roles**: Leave this option enabled.
+  - Click on "Next".
+  - Click on "Save" to create the client.
+
+5. **Obtain Client Secret**:
+  - After saving, click on the "Credentials" tab.
+  - Copy the value of the `Client Secret` field. This is your `KEYCLOAK_CLIENT_SECRET`.
 
 ## Usage
 
