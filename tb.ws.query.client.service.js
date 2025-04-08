@@ -44,7 +44,8 @@ class TBWSQueryClientService {
   connect(token) {
     this.ws = new WebSocket(this.url, {
       headers: {
-        'Cookie': 'access_token=' + encodeURIComponent(token) + '; path=/;' // Set the authentication token in the headers
+        'Authorization': 'bearer ' + token, // Set the authentication token in the headers
+        // 'Cookie': 'access_token=' + encodeURIComponent(token) + '; path=/;' // Set the authentication token in the headers, TBWebAdmin v1.2.124+ only, work in browser env too
       }
     });
 
