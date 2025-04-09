@@ -57,21 +57,21 @@ let client = new TBWSQueryClientService(`${connectionSettings.TBWebAdminWSApiUrl
  * @returns {Promise<string>} The authorization token.
  */
 async function getKeycloakToken() {
-  const tokenUrl = `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`;
-  
+  const tokenUrl = connectionSettings.SSOGetTokenURL;
+
   const requestData = new URLSearchParams({
     grant_type: 'client_credentials',
     client_id: process.env.KEYCLOAK_CLIENT_ID,
     client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
   });
-  
+
   try {
     const response = await axios.post(tokenUrl, requestData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
-    
+
     return response.data.access_token;
   } catch (error) {
     console.error('Error getting token from Keycloak:', error);
