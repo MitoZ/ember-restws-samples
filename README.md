@@ -7,7 +7,7 @@ This project provides a WebSocket client service for querying trades data. The s
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Keycloak Configuration](#keycloak-configuration)
+- [Keycloak Configuration Example](#keycloak-configuration-example)
 - [Usage](#usage)
 - [Important Methods](#important-methods)
 - [File Descriptions](#file-descriptions)
@@ -31,30 +31,26 @@ npm install
 Create a `.env` file in the root directory of your project and add the following variables:
 
 ```plaintext
-KEYCLOAK_URL='your-keykloak-url'
-KEYCLOAK_REALM='your-real'
-KEYCLOAK_CLIENT_ID='your-client-id'
-KEYCLOAK_CLIENT_SECRET='your-client-secret'
+SSO_CLIENT_ID='your-client-id'
+SSO_CLIENT_SECRET='your-client-secret'
 ```
 
-- **KEYCLOAK_URL**: The base URL of the Keycloak server.
-- **KEYCLOAK_REALM**: The realm in Keycloak where the client is configured.
-- **KEYCLOAK_CLIENT_ID**: The client ID used for authentication with Keycloak.
-- **KEYCLOAK_CLIENT_SECRET**: The client secret used for authentication with Keycloak.
+- **SSO_CLIENT_ID**: The client ID used for authentication with your SSO Provider.
+- **SSO_CLIENT_SECRET**: The client secret used for authentication with your SSO Provider.
 
 You can also pass environment variables through the CLI.
 For example:
 
 In UNIX
 ```bash
-KEYCLOAK_CLIENT_ID=another-client-id node index.js
+SSO_CLIENT_ID=another-client-id node index.js
 ```
 In Windows
 ```bash
-set KEYCLOAK_CLIENT_ID=another-client-id && node index.js
+set SSO_CLIENT_ID=another-client-id && node index.js
 ```
 
-In `connection.settings.js` there is few additional necessary parameters
+In `ws.connection.settings.js` there is few additional necessary parameters
 
 ```plaintext
 {
@@ -74,7 +70,19 @@ If **live = true**: the subscription will return all data from dateFrom to the c
 
 If **live = false**: the subscription will return data from dateFrom to the current moment, and the subscription will then be closed. if dateFrom is not specified, the data will be selected from the very beginning of the stream.
 
-## Keycloak Configuration
+
+In `sso.connection.settings.js` there is few additional necessary parameters
+
+```plaintext
+    SSOUrl: 'your-sso-url'
+    realm: 'your-realm'
+    getTokenURL: `${SSOConnectionSettings.SSOUrl}/realms/${SSOConnectionSettings.realm}/protocol/openid-connect/token`
+```
+- **SSOUrl**: The base URL of your SSO Provider server
+- **realm**: The realm in Keycloak (as example) where the client is configured
+- **getTokenURL**: Getting token from your SSO Provider URL Constructor
+
+## Keycloak Configuration Example
 This is quick guide for creating keycloak client with `client_credentials` authorisation flow (grant_type).
 
 ### Keycloak before 19
@@ -90,7 +98,7 @@ This is quick guide for creating keycloak client with `client_credentials` autho
   - Click on the "Create" button to create a new client.
 
 4. **Client Settings**:
-  - **Client ID**: Enter a unique identifier for your client (e.g., `websocket-client`). This is your `KEYCLOAK_CLIENT_ID`.
+  - **Client ID**: Enter a unique identifier for your client (e.g., `websocket-client`). This is your `SSO_CLIENT_ID`.
   - **Client Protocol**: Select `openid-connect`.
   - **Access Type**: Select `confidential`. This type requires a client secret for authentication.
   - **Standard Flow Enabled**: Leave this option enabled.
@@ -103,7 +111,7 @@ This is quick guide for creating keycloak client with `client_credentials` autho
 
 5. **Obtain Client Secret**:
   - After saving, click on the "Credentials" tab.
-  - Copy the value of the `Secret` field. This is your `KEYCLOAK_CLIENT_SECRET`.
+  - Copy the value of the `Secret` field. This is your `SSO_CLIENT_SECRET`.
 
 ### Keycloak 19 and later
 
@@ -119,7 +127,7 @@ This is quick guide for creating keycloak client with `client_credentials` autho
   - Click on the "Create" button to create a new client.
 
 4. **Client Settings**:
-  - **Client ID**: Enter a unique identifier for your client (e.g., `websocket-client`). This is your `KEYCLOAK_CLIENT_ID`.
+  - **Client ID**: Enter a unique identifier for your client (e.g., `websocket-client`). This is your `SSO_CLIENT_ID`.
   - Click on "Next". 
   - **Client authentication**: Leave this option enabled.
   - **Standard Flow Enabled**: Leave this option enabled.
@@ -129,7 +137,7 @@ This is quick guide for creating keycloak client with `client_credentials` autho
 
 5. **Obtain Client Secret**:
   - After saving, click on the "Credentials" tab.
-  - Copy the value of the `Client Secret` field. This is your `KEYCLOAK_CLIENT_SECRET`.
+  - Copy the value of the `Client Secret` field. This is your `SSO_CLIENT_SECRET`.
 
 ## Usage
 
@@ -139,7 +147,7 @@ To run the service in a Node.js environment, use the following command:
 node index.js
 ```
 
-The application will obtain an authorization token from Keycloak and connect to the WebSocket server using the provided configuration.
+The application will obtain an authorization token from your SSO Provider and connect to the WebSocket server using the provided configuration.
 
 ## Important Methods
 
@@ -205,7 +213,7 @@ Main entry point of the application. It performs the following tasks:
 - Loads environment variables.
 - Initializes the `DataService` with a callback function for closed trades.
 - Configures and creates an instance of `TbWsQueryClientService`.
-- Obtains an authorization token from Keycloak.
+- Obtains an authorization token from your SSO Provider.
 - Connects the WebSocket client using the obtained token.
 
 ### data.service.js
@@ -229,19 +237,25 @@ Defines the `TbWsQueryClientService` class, which is responsible for managing We
 
 Configuration file for environment variables. It should contain the following variables:
 
-- **KEYCLOAK_URL**: The base URL of the Keycloak server.
-- **KEYCLOAK_REALM**: The realm in Keycloak where the client is configured.
-- **KEYCLOAK_CLIENT_ID**: The client ID used for authentication with Keycloak.
-- **KEYCLOAK_CLIENT_SECRET**: The client secret used for authentication with Keycloak.
+- **SSO_CLIENT_ID**: The client ID used for authentication with your SSO Provider.
+- **SSO_CLIENT_SECRET**: The client secret used for authentication with your SSO Provider.
 
-### connection.settings.js
+### ws.connection.settings.js
 
-Configuration file for connection variables. It should contain the following variables:
+Configuration file for web sockets connection variables. It should contain the following variables:
 
 - **TBWebAdminWSApiUrl**: TimeBase WebSockets api url.
 - **query**: QQL query for requesting data.
 - **dateFrom**: The date from which the data will be selected.
 - **live**: Subscription mode.
+
+### sso.connection.settings.js
+
+Configuration file for connection to you SSO Provider to get auth token variables. It should contain the following variables:
+
+- **getTokenURL** - Getting token URL Constructor.
+- **SSOUrl** - The base URL of your SSO Provider server.
+- **realm** - The realm in Keycloak where the client is configured.
 
 ## Documentation
 

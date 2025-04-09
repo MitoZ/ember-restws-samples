@@ -1,8 +1,8 @@
 const axios = require('axios'); // Import axios for making HTTP requests
-require('dotenv').config(); // Load environment variables from .env file
 const DataService = require('./data.service'); // Import DataService for managing trades
 const TBWSQueryClientService = require('./tb.ws.query.client.service'); // Import WebSocket client service
-const connectionSettings = require('./connection.settings'); //Import Connection Settings
+const WSConnectionSettings = require('./ws.connection.settings'); //Import WebSocket Connection Settings
+const SSOConnectionSettings = require('./sso.connection.settings'); //Import SSO Connection Settings
 
 // Initialize DataService with a callback function for closed trades
 const Orders_Service = new DataService((closedTrade) => {
@@ -11,7 +11,6 @@ const Orders_Service = new DataService((closedTrade) => {
 });
 
 // WebSocket API URL and query parameters
-
 /**
  * Create WebSocket client service with event handlers
  * @param {string} url - The WebSocket connection URL.
@@ -21,7 +20,7 @@ const Orders_Service = new DataService((closedTrade) => {
  * @param {Function} [callbacks.onError] - Called when an error occurs with the WebSocket connection.
  * @param {Function} [callbacks.onClose] - Called when the WebSocket connection is closed.
  */
-let client = new TBWSQueryClientService(`${connectionSettings.TBWebAdminWSApiUrl}/query`, {
+let client = new TBWSQueryClientService(`${WSConnectionSettings.TBWebAdminWSApiUrl}/query`, {
   onOpen: (client) => {
     /**
      * Start a subscription with the given query.
@@ -29,7 +28,7 @@ let client = new TBWSQueryClientService(`${connectionSettings.TBWebAdminWSApiUrl
      * @param {boolean} live - Whether the query is live.
      * @param {string} dateFrom - The starting date for the query.
      */
-    client.startSubscription(connectionSettings.query, connectionSettings.live, connectionSettings.dateFrom);
+    client.startSubscription(WSConnectionSettings.query, WSConnectionSettings.live, WSConnectionSettings.dateFrom);
   },
   onMessage: (message) => {
     try {
@@ -53,20 +52,19 @@ let client = new TBWSQueryClientService(`${connectionSettings.TBWebAdminWSApiUrl
 });
 
 /**
- * Function to get an authorization token from Keycloak using client credentials.
+ * Function to get an authorization token from your SSO Provider using client credentials.
  * @returns {Promise<string>} The authorization token.
  */
-async function getKeycloakToken() {
-  const tokenUrl = connectionSettings.SSOGetTokenURL;
+async function getSSOToken() {
 
   const requestData = new URLSearchParams({
     grant_type: 'client_credentials',
-    client_id: process.env.KEYCLOAK_CLIENT_ID,
-    client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+    client_id: SSOConnectionSettings.clientId,
+    client_secret: SSOConnectionSettings.clientSecret,
   });
 
   try {
-    const response = await axios.post(tokenUrl, requestData, {
+    const response = await axios.post(SSOConnectionSettings.getTokenURL, requestData, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -74,13 +72,13 @@ async function getKeycloakToken() {
 
     return response.data.access_token;
   } catch (error) {
-    console.error('Error getting token from Keycloak:', error);
+    console.error('Error getting token from SSO:', error);
     throw error;
   }
 }
 
-// Obtain the Keycloak token and connect the WebSocket client
-getKeycloakToken()
+// Obtain the Auth token and connect the WebSocket client
+getSSOToken()
   .then(token => {
     console.log('Access Token:', token);
     client.connect(token); // Connect the WebSocket client with the token

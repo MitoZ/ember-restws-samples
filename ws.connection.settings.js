@@ -1,16 +1,11 @@
-require('dotenv').config(); // Load environment variables from .env file
-
 /**
  * Constants required for establishing a WS connection and configuring the subscription.
- * @param {string} SSOGetTokenURL - Getting token from SSO provider URL Constructor.
  * @param {string} TBWebAdminWSApiUrl - TimeBase WebSockets api url.
  * @param {string} query - QQL query for requesting data.
  * @param {string} dateFrom - The date (only ISODateString) from which the data will be selected.
  * @param {boolean} live - Subscription mode.
  */
-const connectionSettings = {
-  SSOGetTokenURL: `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
-
+const WSConnectionSettings = {
   TBWebAdminWSApiUrl: 'ws://localhost:8099/ws/v0',
   query: 'select * from "warehouse-TRADES"',
 
@@ -36,4 +31,4 @@ const connectionSettings = {
   live: true,
 }
 
-module.exports = connectionSettings;
+module.exports = WSConnectionSettings;
