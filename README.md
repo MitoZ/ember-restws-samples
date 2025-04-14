@@ -33,10 +33,16 @@ Create a `.env` file in the root directory of your project and add the following
 ```plaintext
 SSO_CLIENT_ID='your-client-id'
 SSO_CLIENT_SECRET='your-client-secret'
+TBWA_USERNAME='TB-WebAdmin-username'
+TBWA_PASSWORD='TB-WebAdmin-password'
 ```
 
 - **SSO_CLIENT_ID**: The client ID used for authentication with your SSO Provider.
 - **SSO_CLIENT_SECRET**: The client secret used for authentication with your SSO Provider.
+- **TBWA_USERNAME**: The username/login for authentication with 'BUILD_IN' type in TB WebAdmin.
+- **TBWA_PASSWORD**: The password for authentication with 'BUILD_IN' type in TB WebAdmin.
+
+If your TimeBase WebAdmin is set up with build-in authentication use variables `TBWA_USERNAME` and `TBWA_PASSWORD`, if SSO - `SSO_CLIENT_ID` and `SSO_CLIENT_SECRET`;
 
 You can also pass environment variables through the CLI.
 For example:
@@ -74,13 +80,15 @@ If **live = false**: the subscription will return data from dateFrom to the curr
 In `sso.connection.settings.js` there is few additional necessary parameters
 
 ```plaintext
-    SSOUrl: 'your-sso-url'
+    authType: 'SSO' or 'BUILD_IN'
+    authBaseUrl: 'your-base-auth-url'
     realm: 'your-realm'
-    getTokenURL: `${SSOConnectionSettings.SSOUrl}/realms/${SSOConnectionSettings.realm}/protocol/openid-connect/token`
+    getTokenURL: `${SSOConnectionSettings.authBaseUrl}/realms/${SSOConnectionSettings.realm}/protocol/openid-connect/token` or `${SSOConnectionSettings.authBaseUrl}/oauth/token`
 ```
-- **SSOUrl**: The base URL of your SSO Provider server
+- **authType**: Authentication type: 'BUILD_IN' || 'SSO'. 'BUILD_IN' - TB WebAdmin build-in authentication.
+- **authBaseUrl**: The base URL of your SSO Provider server or base url to TB WebAdmin if your TimeBase WebAdmin is set up with build-in authentication.
 - **realm**: The realm in Keycloak (as example) where the client is configured
-- **getTokenURL**: Getting token from your SSO Provider URL Constructor
+- **getTokenURL**: Getting token from your SSO Provider or from TB WebAdmin URL Constructor
 
 ## Keycloak Configuration Example
 This is quick guide for creating keycloak client with `client_credentials` authorisation flow (grant_type).
@@ -239,6 +247,8 @@ Configuration file for environment variables. It should contain the following va
 
 - **SSO_CLIENT_ID**: The client ID used for authentication with your SSO Provider.
 - **SSO_CLIENT_SECRET**: The client secret used for authentication with your SSO Provider.
+- **TBWA_USERNAME**: The username/login for authentication with 'BUILD_IN' type in TB WebAdmin.
+- **TBWA_PASSWORD**: The password for authentication with 'BUILD_IN' type in TB WebAdmin.
 
 ### ws.connection.settings.js
 
@@ -253,8 +263,9 @@ Configuration file for web sockets connection variables. It should contain the f
 
 Configuration file for connection to you SSO Provider to get auth token variables. It should contain the following variables:
 
+- **authType**: Authentication type: 'BUILD_IN' || 'SSO'. 'BUILD_IN' - TB WebAdmin build-in authentication.
 - **getTokenURL** - Getting token URL Constructor.
-- **SSOUrl** - The base URL of your SSO Provider server.
+- **authBaseUrl** - The base URL of your SSO Provider server or base url to TB WebAdmin if your TimeBase WebAdmin is set up with build-in authentication.
 - **realm** - The realm in Keycloak where the client is configured.
 
 ## Documentation

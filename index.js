@@ -70,9 +70,9 @@ async function getSSOToken() {
       break;
     case 'BUILD_IN':
       requestData = new URLSearchParams({
-        username: SSOConnectionSettings.clientId,
-        password: SSOConnectionSettings.clientSecret,
         grant_type: 'password',
+        username: SSOConnectionSettings.username,
+        password: SSOConnectionSettings.password,
         scope: 'trust'
       });
       headers = {
