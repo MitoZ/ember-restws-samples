@@ -56,18 +56,37 @@ let client = new TBWSQueryClientService(`${WSConnectionSettings.TBWebAdminWSApiU
  * @returns {Promise<string>} The authorization token.
  */
 async function getSSOToken() {
-
-  const requestData = new URLSearchParams({
-    grant_type: 'client_credentials',
-    client_id: SSOConnectionSettings.clientId,
-    client_secret: SSOConnectionSettings.clientSecret,
-  });
+  let requestData, headers;
+  switch (SSOConnectionSettings.authType) {
+    case 'SSO':
+      requestData = new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: SSOConnectionSettings.clientId,
+        client_secret: SSOConnectionSettings.clientSecret,
+      });
+      headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
+      break;
+    case 'BUILD_IN':
+      requestData = new URLSearchParams({
+        username: SSOConnectionSettings.clientId,
+        password: SSOConnectionSettings.clientSecret,
+        grant_type: 'password',
+        scope: 'trust'
+      });
+      headers = {
+        'Authorization': 'Basic d2ViOnNlY3JldA==',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
+      break;
+    default:
+      break;
+  }
 
   try {
     const response = await axios.post(SSOConnectionSettings.getTokenURL, requestData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: headers,
     });
 
     return response.data.access_token;
