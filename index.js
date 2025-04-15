@@ -49,6 +49,8 @@ let client = new TBWSQueryClientService(`${WSConnectionSettings.TBWebAdminWSApiU
     console.warn('Closed Trades Subscription', message);
     console.log('Not Closed Trades:', Orders_Service.getNotClosedTrades()); // Log trades that are not closed
   },
+}, {
+  heartbeatInterval: WSConnectionSettings.heartbeatInterval
 });
 
 /**

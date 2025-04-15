@@ -12,10 +12,15 @@ class TBWSQueryClientService {
    * @param {Function} [callbacks.onMessage] - Called when a message is received from the WebSocket server.
    * @param {Function} [callbacks.onError] - Called when an error occurs with the WebSocket connection.
    * @param {Function} [callbacks.onClose] - Called when the WebSocket connection is closed.
+   * @param {Object} WSParams - Additional WS params.
+   * @param {number} [WSParams.heartbeatInterval] - Heartbeat interval.
    */
-  constructor(url, callbacks) {
+  constructor(url, callbacks, WSParams) {
     this.url = url;
     this.ws = null;
+    this.live = null;
+    this.heartbeatTimer = null;
+    this.WSParams = WSParams || {};
     if (callbacks && Object.keys(callbacks).length > 0) {
       this.callbacks = callbacks;
     }
@@ -64,6 +69,7 @@ class TBWSQueryClientService {
   startSubscription(query, live, dateFrom) {
     const request = JSON.stringify(this.createQueryRequest(query, live, dateFrom)); // Create the query request
     console.log("Subscribe request: " + request);
+    this.live = live;
     this.ws.send(request); // Send the subscription request
   }
 
@@ -75,6 +81,31 @@ class TBWSQueryClientService {
       this.callbacks.onOpen(this); // Call the onOpen callback if it exists.
     } else {
       console.log("### WS opened ###");
+    }
+    if (this.live && this.WSParams.heartbeatInterval) {
+      this.startHeartbeat();
+    }
+  }
+
+  /**
+   * Start sending heartbeat messages to keep the connection alive.
+   */
+  startHeartbeat() {
+    this.heartbeatTimer = setInterval(() => {
+      if (this.ws.readyState === WebSocket.OPEN) {
+        // this.ws.send('');
+        this.ws.ping();
+        // console.log('[WS] ping');
+      }
+    }, this.WSParams.heartbeatInterval); // Send a heartbeat every 30 seconds
+  }
+  /**
+   * Stop sending heartbeat messages.
+   */
+  stopHeartbeat() {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
     }
   }
 
@@ -120,6 +151,7 @@ class TBWSQueryClientService {
    */
   disconnect() {
     if (this.ws) {
+      this.stopHeartbeat(); // Stop sending heartbeats
       this.ws.close(); // Close the WebSocket connection
     }
   }

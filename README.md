@@ -64,6 +64,7 @@ In `ws.connection.settings.js` there is few additional necessary parameters
     query: 'select * from "warehouse-TRADES"',
     dateFrom: '1980-01-01T00:00:00.000Z',
     live: true,
+    heartbeatInterval: 30000
 }
 ```
 - **TBWebAdminWSApiUrl**: TimeBase WebSockets api url
@@ -72,10 +73,11 @@ In `ws.connection.settings.js` there is few additional necessary parameters
   If an earlier date than the start of the stream is specified, the data selection will begin from the start of the stream. The data selection, in conjunction with dateFrom, is also influenced by the Subscription mode (specified below).
 - **live**: Subscription mode.
 
-If **live = true**: the subscription will return all data from dateFrom to the current moment and will remain active; as new records appear in the database, they will be sent to the subscription. if dateFrom is not specified, it will default to "Date Now."
+  If **live = true**: the subscription will return all data from dateFrom to the current moment and will remain active; as new records appear in the database, they will be sent to the subscription. if dateFrom is not specified, it will default to "Date Now."
+  
+  If **live = false**: the subscription will return data from dateFrom to the current moment, and the subscription will then be closed. if dateFrom is not specified, the data will be selected from the very beginning of the stream.
 
-If **live = false**: the subscription will return data from dateFrom to the current moment, and the subscription will then be closed. if dateFrom is not specified, the data will be selected from the very beginning of the stream.
-
+- **heartbeatInterval**: A time parameter specifying the interval at which the heartbeat will be sent if `live = true`. If not specified, the heartbeat will not be sent.
 
 In `sso.connection.settings.js` there is few additional necessary parameters
 
@@ -258,6 +260,7 @@ Configuration file for web sockets connection variables. It should contain the f
 - **query**: QQL query for requesting data.
 - **dateFrom**: The date from which the data will be selected.
 - **live**: Subscription mode.
+- **heartbeatInterval**: Heartbeat interval.
 
 ### sso.connection.settings.js
 

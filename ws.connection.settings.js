@@ -4,6 +4,7 @@
  * @param {string} query - QQL query for requesting data.
  * @param {string} dateFrom - The date (only ISODateString) from which the data will be selected.
  * @param {boolean} live - Subscription mode.
+ * @param {number} heartbeatInterval - Heartbeat interval.
  */
 const WSConnectionSettings = {
   TBWebAdminWSApiUrl: 'ws://localhost:8099/ws/v0',
@@ -29,6 +30,12 @@ const WSConnectionSettings = {
    * if dateFrom is not specified, the data will be selected from the very beginning of the stream.
    */
   live: true,
+
+  /**
+   * A time parameter specifying the interval at which the heartbeat will be sent if `live = true`.
+   * If not specified, the heartbeat will not be sent.
+   */
+  heartbeatInterval: 30000,
 }
 
 module.exports = WSConnectionSettings;
